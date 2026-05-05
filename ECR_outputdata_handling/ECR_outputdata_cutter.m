@@ -1,31 +1,77 @@
-%% Interactive MAT-file segment extraction with linear background subtraction
-% This script loads a MAT-file containing the variable `AllData`, where:
-%   - column 1 is time
-%   - column 2 is current
+%% =========================
+%  General Info
+%  =========================
+%  Filename: ECR_outputdata_cutter.m
+%  Creator: Michele Tunesi
+%  Email: michele.tunesi@polito.it
+%  Date: 05-05-2026
+%  Version: 1.0
+
+%% =========================
+%  Code Description
+%  =========================
+%  Abstract:
+%  This script interactively loads a MAT-file containing time-current data,
+%  selects a fixed-duration signal interval, estimates a linear background
+%  from tail regions before and after the interval, subtracts the background,
+%  and saves the processed signal together with the original full signal.
 %
-% The workflow is interactive:
-%   1. The user selects a MAT-file.
-%   2. The full signal is plotted together with a moving-mean trace.
-%   3. Two points are clicked to define a zoom region.
-%   4. One final point is clicked to define the end of the segment of interest.
-%   5. A time window of fixed duration is extracted before that point.
-%   6. A linear background is estimated from left and right tail regions.
-%   7. The extracted segment is background-subtracted and time-shifted to start at zero.
-%   8. The processed data are previewed and then saved to a new MAT-file.
+%  Inputs:
+%  - MAT-file selected by the user: input file containing the variable AllData
+%  - AllData (:,1): time vector, in seconds
+%  - AllData (:,2): current signal
 %
-% Output files are stored in a subfolder named `output_files` created in the
-% same directory as the selected input file.
-%
-% Keyboard controls during point selection:
-%   - ESC   : exit the script
-%   - ENTER : restart from scratch and select a new input file
-%
-% Saved variables:
-%   - time_select     : extracted time vector, shifted so that it starts at 0
-%   - current_select  : extracted current vector after background subtraction
-%   - time_full       : full original time vector
-%   - current_full    : full original current vector
-%   - timestamps      : [t0 tf] of the extracted segment in the original signal
+%  Outputs:
+%  - time_select: selected time vector shifted so that it starts from zero
+%  - current_select: selected current signal after linear background subtraction
+%  - time_full: original full time vector
+%  - current_full: original full current signal
+%  - timestamps: original start and end times of the selected interval
+%  - output MAT-file: saved in the output_files folder
+
+%% =========================
+%  Usage
+%  =========================
+%  Example:
+%  Run the script, select a MAT-file when prompted, select the zoom region,
+%  select the final point of the interval, and enter the output file number.
+
+%% =========================
+%  Parameters
+%  =========================
+%  - tailDuration: duration of each tail region used for the background fit, in seconds
+%  - mainDuration: duration of the selected main interval, in seconds
+%  - base_filename: base name used for saved output files
+%  - previewTime: duration of the background-subtraction preview, in seconds
+%  - kk: initial proposed file number for saving
+
+%% =========================
+%  Dependencies
+%  =========================
+%  - Required toolboxes: none
+%  - External functions/files: input MAT-file containing AllData
+
+%% =========================
+%  Notes
+%  =========================
+%  The selected interval is defined as a fixed-duration window ending at the
+%  final point selected by the user. Background subtraction is performed by
+%  fitting a first-order polynomial to the left and right tail regions.
+%  Press ESC to exit. Press ENTER to restart from scratch.
+
+%% =========================
+%  Revision History
+%  =========================
+%  v1.0 (05-05-2026): initial version
+
+%% =========================
+%  License
+%  =========================
+%  This work is licensed under the Creative Commons
+%  Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+%  You are free to reuse and adapt this code for non-commercial purposes,
+%  provided that appropriate credit is given to the original author.
+%  License details: https://creativecommons.org/licenses/by-nc/4.0/
 
 clear
 close all

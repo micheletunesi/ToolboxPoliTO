@@ -1,1 +1,0 @@
-MATLAB script for interactive extraction of fixed-duration current segments from MAT-files containing `AllData`. The script supports zoom-based point selection, linear background subtraction from tail regions, preview of the processed segment, and saving of processed outputs to an `output_files` folder.
