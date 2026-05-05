@@ -1,40 +1,87 @@
-% This script processes all MAT files in the "output_files" folder.
+%% =========================
+%  General Info
+%  =========================
+%  Filename: ECR_outputdata_plotter.m
+%  Creator: Michele Tunesi
+%  Email: michele.tunesi@polito.it
+%  Date: 05-05-2026
+%  Version: 1.0
+
+%% =========================
+%  Code Description
+%  =========================
+%  Abstract:
+%  This script processes all MAT files stored in the "output_files" folder.
+%  For each file, it loads the variables "time_select" and "current_select",
+%  computes the average current within a selected time window, generates an
+%  individual plot, and saves the plot in PNG and MATLAB FIG formats.
+%  The script also creates a summary table and a summary plot containing the
+%  average current values for all processed files.
 %
-% Purpose
-%   1. Load the variables "time_select" and "current_select" from each MAT file
-%   2. Compute the average current within a selected time window
-%   3. Generate one figure per file with:
-%        - the full current signal
-%        - the averaging interval limits
-%        - the samples used for the average
-%        - the average current as a horizontal line
-%   4. Save each figure as both PNG and MATLAB FIG
-%   5. Create a summary table of average values
-%   6. Create a summary figure across all processed files
+%  Inputs:
+%  - time_select (numeric vector, N x 1 or 1 x N): time values loaded from each MAT file
+%  - current_select (numeric vector, N x 1 or 1 x N): current values loaded from each MAT file
 %
-% Expected input
-%   The script looks for MAT files inside:
-%       ./output_files
+%  Outputs:
+%  - resultsTable (table, M x 3): table containing file names, average current values,
+%    and processing status
+%  - individual PNG figures (image files): plots saved in ./output_files/figures
+%  - individual FIG figures (MATLAB figure files): plots saved in ./output_files/plots
+%  - summary_average_current.png (image file): summary plot saved in ./output_files/figures
+%  - summary_average_current.fig (MATLAB figure file): summary plot saved in ./output_files/plots
+
+%% =========================
+%  Usage
+%  =========================
+%  Example:
+%  Run the script from the MATLAB Command Window after placing the MAT files
+%  inside the "output_files" folder:
 %
-%   Each MAT file must contain:
-%       - time_select
-%       - current_select
+%  average_current_batch_processing
+
+%% =========================
+%  Parameters
+%  =========================
+%  - outputDir: path to the folder containing the MAT files
+%  - figPngDir: path to the folder where PNG figures are saved
+%  - figDir: path to the folder where MATLAB FIG files are saved
+%  - tStartAvg: start time of the averaging interval, in seconds
+%  - tEndAvg: end time of the averaging interval, in seconds
+
+%% =========================
+%  Dependencies
+%  =========================
+%  - Required toolboxes:
+%    None
+%  - External functions/files:
+%    MAT files stored in ./output_files, each containing "time_select" and
+%    "current_select"
+
+%% =========================
+%  Notes
+%  =========================
+%  Files are skipped when required variables are missing, when data vectors
+%  are empty, or when "time_select" and "current_select" have different
+%  lengths. If no samples are found within the selected averaging interval,
+%  the corresponding average value remains NaN.
 %
-% Output folders
-%   PNG figures:
-%       ./output_files/figures
-%
-%   MATLAB FIG files:
-%       ./output_files/plots
-%
-% Notes
-%   - Files missing the required variables are skipped
-%   - Files with empty or inconsistent data are skipped
-%   - The summary table is displayed in the Command Window
-%   - Optional save commands for the summary table are included at the end
-%
-% Author
-%   Michele Tunesi
+%  The summary table is displayed in the Command Window. Optional save
+%  commands for exporting the table as MAT or CSV are included at the end of
+%  the script and can be uncommented.
+
+%% =========================
+%  Revision History
+%  =========================
+%  v1.0 (05-05-2026): initial version
+
+%% =========================
+%  License
+%  =========================
+%  This work is licensed under the Creative Commons
+%  Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+%  You are free to reuse and adapt this code for non-commercial purposes,
+%  provided that appropriate credit is given to the original author.
+%  License details: https://creativecommons.org/licenses/by-nc/4.0/
 
 clear;
 clc;
