@@ -1,57 +1,104 @@
-%% ECR_DataAcquisition_current
-% DC current acquisition from a Fluke 8845A over TCP/IP with live plotting,
-% moving-mean visualization, periodic autosave, and optional final export.
+%% =========================
+%  General Info
+%  =========================
+%  Filename: ECR_DataAcquisition_current.m
+%  Creator: Michele Tunesi
+%  Email: michele.tunesi@polito.it
+%  Date: 05-05-2026
+%  Version: 1.0
+
+%% =========================
+%  Code Description
+%  =========================
+%  Abstract:
+%  This script acquires DC current data from a Fluke 8845A multimeter over a
+%  TCP/IP connection using SCPI commands. The instrument is configured for
+%  DC current measurements, and data are acquired in blocks, converted to
+%  mA, filtered for invalid or overload values, and displayed in a live
+%  plot. The live plot shows the most recent time window together with a
+%  moving-mean trace. The script also supports periodic autosave and an
+%  optional final export in compact or full format.
 %
-% Description
-% This script acquires DC current data from a Fluke 8845A multimeter using
-% the SCPI command interface over a TCP/IP connection. The instrument is
-% configured for DC current measurements, data are read in blocks defined by
-% SAMP:COUN, converted to mA, filtered for invalid or overload values, and
-% displayed in a live plot showing only the most recent time window.
+%  Inputs:
+%  - ipAddress (character vector, 1 x N): Fluke 8845A IP address
+%  - portNumber (numeric scalar): TCP port used for communication
+%  - timeInMinutes (numeric scalar): total acquisition duration in minutes
+%  - sampleCount (numeric scalar): number of samples returned by each READ command
+%  - currentRange_A (numeric scalar): fixed DC current range in A
+%  - nplcValue (numeric scalar): integration time in power line cycles
 %
-% Main features
-% - Fixed-duration acquisition in minutes
-% - Live plot of the last N seconds
-% - Moving-mean trace computed on the live data
-% - Periodic autosave of the most recent data window
-% - Optional final save with either compact or full dataset
-% - Instrument reset to local control on exit or interruption
+%  Outputs:
+%  - time (numeric vector, N x 1): valid acquisition time vector in s, compact save
+%  - current (numeric vector, N x 1): valid current vector in mA, compact save
+%  - AllData (numeric matrix, N x 2): full dataset containing time in s and current in mA
+%  - Res (structure array, 1 x M): block-wise acquisition data
+%  - rawCurrent (string vector, M x 1): raw SCPI replies
+%  - timeValid (numeric vector, N x 1): valid acquisition time vector in s
+%  - ResValid (numeric vector, N x 1): valid current vector in mA
+
+%% =========================
+%  Usage
+%  =========================
+%  Example:
+%  ECR_DataAcquisition_current
+
+%% =========================
+%  Parameters
+%  =========================
+%  - timeInMinutes: total acquisition duration in minutes
+%  - sampleCount: number of samples requested from the instrument at each read
+%  - liveWindow_s: width of the live plot time window in s
+%  - movMeanWindowSamples: moving-mean window length in samples
+%  - autosaveEnabled: enable or disable periodic autosave
+%  - autosaveEvery_s: autosave period in s
+%  - autosaveWindow_s: length of the recent data window saved during autosave
+%  - autosaveFolder: folder used for autosave MAT files
+%  - ipAddress: Fluke 8845A IP address
+%  - portNumber: TCP communication port
+%  - timeout_s: TCP communication timeout in s
+%  - currentRange_A: fixed DC current range in A
+%  - setFixedRange: select fixed current range or default instrument range
+%  - nplcValue: integration time in power line cycles
+%  - useAutoZero: enable or disable auto-zero
+%  - plotRefresh_s: live plot update period in s
+%  - overloadThreshold_mA: absolute threshold used to reject invalid current values
+%  - defaultFilePrefix: default prefix used for final save filenames
+%  - cleanSaveDefault: default setting for compact or full final export
+
+%% =========================
+%  Dependencies
+%  =========================
+%  - Required toolboxes:
+%    Instrument Control Toolbox or MATLAB support for tcpclient
+%  - External functions/files:
+%    Fluke 8845A multimeter reachable over TCP/IP
+
+%% =========================
+%  Notes
+%  =========================
+%  The script stops automatically after the selected acquisition duration.
+%  It can also be stopped early by pressing a key in the figure window or by
+%  closing the figure. Invalid, non-finite, or overload values are removed
+%  from the live plot and from the valid saved vectors according to
+%  overloadThreshold_mA.
 %
-% Inputs to edit in this file
-% - Acquisition timing parameters
-% - Instrument IP address and port
-% - Current range and NPLC settings
-% - Autosave settings
-% - Output filename prefix
-%
-% Saved variables
-% Compact save:
-% - time: valid time vector [s]
-% - current: valid current vector [mA]
-%
-% Full save:
-% - AllData: two-column matrix [time_s, current_mA]
-% - Res: structure array containing block-wise acquisition data
-% - rawCurrent: raw SCPI replies as strings
-% - timeValid: valid time vector [s]
-% - ResValid: valid current vector [mA]
-%
-% Notes
-% - The script stops automatically at the selected duration.
-% - The script can also stop early when a key is pressed in the figure
-%   window.
-% - Overload or invalid values are removed from live plotting and saved
-%   valid vectors through the threshold defined below.
-% - Cleanup is handled with onCleanup so that instrument local control is
-%   restored even if execution stops due to an error.
-%
-% Tested context
-% - MATLAB with tcpclient support
-% - Fluke 8845A reachable over TCP/IP
-%
-% Author: [Your Name]
-% Repository: [Your GitHub repository]
-% License: [Your chosen license]
+%  The onCleanup object calls localCleanup when the script exits, so the
+%  instrument is returned to local control also after an interruption or an
+%  execution error.
+
+%% =========================
+%  Revision History
+%  =========================
+%  v1.0 (05-05-2026): initial version
+
+%% =========================
+%  License
+%  =========================
+%  This work is licensed under the Creative Commons
+%  Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+%  You are free to reuse and adapt this code for non-commercial purposes,
+%  provided that appropriate credit is given to the original author.
+%  License details: https://creativecommons.org/licenses/by-nc/4.0/
 
 clearvars
 close all
