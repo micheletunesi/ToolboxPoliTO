@@ -4,8 +4,8 @@
 %  Filename: ECR_outputdata_cutter.m
 %  Creator: Michele Tunesi
 %  Email: michele.tunesi@polito.it
-%  Date: 05-05-2026
-%  Version: 1.0
+%  Date: 07-05-2026
+%  Version: 1.01
 
 %% =========================
 %  Code Description
@@ -63,6 +63,7 @@
 %  Revision History
 %  =========================
 %  v1.0 (05-05-2026): initial version
+%  v1.01 (07-05-2026): Fixed basename in downloadable code
 
 %% =========================
 %  License
@@ -80,7 +81,7 @@ clc
 % ---------------- USER PARAMETERS ----------------
 tailDuration = 2;   % Duration of each tail region used for background fit, in seconds
 mainDuration = 70;  % Duration of the main extracted interval, in seconds
-base_filename = 'Al46000_secondario_rep_'; % Base name for saved output files
+base_filename = 'DatasetName_'; % Base name for saved output files
 previewTime = 2;    % Time in seconds for BG subtraction preview display
 kk = 1;             % Initial proposed file number for saving
 % -------------------------------------------------
