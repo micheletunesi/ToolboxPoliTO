@@ -4,7 +4,7 @@
 %  Filename: ECR_outputdata_cutter.m
 %  Creator: Michele Tunesi
 %  Email: michele.tunesi@polito.it
-%  Date: 05-05-2026
+%  Date: 07-05-2026
 %  Version: 1.01
 
 %% =========================
@@ -63,7 +63,7 @@
 %  Revision History
 %  =========================
 %  v1.0 (05-05-2026): initial version
-%  v1.01 (05-07-2026): Fixed basename in downloadable code
+%  v1.01 (07-05-2026): Fixed basename in downloadable code
 
 %% =========================
 %  License
