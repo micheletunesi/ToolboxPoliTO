@@ -4,8 +4,8 @@
 %  Filename: NanoAP_NanoCurve_Converter.m
 %  Creator: Michele Tunesi
 %  Email: michele.tunesi@polito.it
-%  Date: 07-05-2026
-%  Version: 1.0
+%  Date: 11-05-2026
+%  Version: 1.1
 
 %% =========================
 %  Code Description
@@ -13,32 +13,33 @@
 %  Abstract:
 %  Batch processing script for NanoAP indentation .txt files. The script
 %  extracts numeric data from the "Measured values" section, parses time,
-%  depth, and force columns, and saves each dataset as a .mat file. An
-%  optional preview of force vs depth is displayed for each processed file.
+%  depth, and force columns, and saves each dataset as a .mat file. A curve
+%  image is saved for each processed file. An optional preview of force vs
+%  depth is displayed during processing.
 %
 %  Inputs:
 %  - folderPath (string, scalar): directory selected via GUI containing .txt files
-%  - baseName (string, scalar): user-defined prefix for output filenames
-%  - showPreview (logical, scalar): flag to enable or disable plotting
+%  - showPreview (logical, scalar): flag to enable or disable plotting preview
 %
 %  Outputs:
 %  - .mat files (time, depth, force vectors): saved in "Processed" subfolder
+%  - .png files: force vs depth curve images saved in "Processed" subfolder
+%  - Output filenames match the original .txt filenames, with .mat and .png extensions
 
 %% =========================
 %  Usage
 %  =========================
 %  Example:
 %  Run the script and follow prompts:
-%  - Select folder containing .txt files
-%  - Enter base filename (e.g. "indent")
 %  - Choose whether to display preview figures
+%  - Select folder containing .txt files
 
 %% =========================
 %  Parameters
 %  =========================
 %  - numericRowPattern: regular expression used to detect numeric data rows
 %  - pause duration: fixed at 3 s for preview display
-%  - output naming: <baseName>_<number>.mat extracted from filename
+%  - output naming: original .txt filename with .mat and .png extensions
 
 %% =========================
 %  Dependencies
@@ -56,12 +57,16 @@
 %       column 3 = force (mN)
 %  - Decimal commas are converted to decimal points before parsing.
 %  - Files without a "Measured values" section or valid numeric data are skipped.
-%  - Output numbering is extracted from trailing digits in the filename.
+%  - Output files are saved as <original_txt_filename>.mat, not .txt.mat.
+%  - Curve images are always saved, also when preview display is disabled.
 
 %% =========================
 %  Revision History
 %  =========================
 %  v1.0 (07-05-2026): initial version
+%  v1.1 (11-05-2026): removed base filename prompt and saved .mat files
+%                     using original .txt filenames and added figure saving
+%   
 
 %% =========================
 %  License
@@ -76,12 +81,7 @@ clear;
 clc;
 
 %% USER INPUTS
-baseName    = input('Enter base filename (e.g. indent): ', 's');
 showPreview = input('Show preview figures? (true/false): ');
-
-if isempty(baseName)
-    baseName = 'indent';
-end
 
 if isempty(showPreview)
     showPreview = true;
@@ -120,6 +120,7 @@ end
 %% Initialize counters
 nFiles = numel(fileList);
 nSaved = 0;
+nImagesSaved = 0;
 nSkipped = 0;
 
 %% Pattern used to identify numeric data rows
@@ -231,26 +232,38 @@ for k = 1:nFiles
     depth = parsedData(:, 2);
     force = parsedData(:, 3);
 
-    %% Extract trailing number from filename
+    %% Define output filenames using original .txt filename
     [~, baseFileName, ~] = fileparts(fileName);
-    token = regexp(baseFileName, '(\d+)$', 'tokens', 'once');
 
-    if isempty(token)
-        warning('Skipping %s: no trailing number in filename.', fileName);
-        nSkipped = nSkipped + 1;
-        continue;
-    end
+    outputMatName = sprintf('%s.mat', baseFileName);
+    outputPngName = sprintf('%s.png', baseFileName);
 
-    fileNumber = token{1};
+    outputMatFile = fullfile(processedFolder, outputMatName);
+    outputPngFile = fullfile(processedFolder, outputPngName);
 
-    %% Save file with custom base name
-    outputName = sprintf('%s_%s.mat', baseName, fileNumber);
-    outputFile = fullfile(processedFolder, outputName);
+    %% Save .mat file
+    save(outputMatFile, 'time', 'depth', 'force');
 
-    save(outputFile, 'time', 'depth', 'force');
-
-    fprintf('Saved: %s\n', outputFile);
+    fprintf('Saved MAT: %s\n', outputMatFile);
     nSaved = nSaved + 1;
+
+    %% Always save curve image
+    hSaveFig = figure( ...
+        'Visible', 'off', ...
+        'Name', 'Force vs Depth saved image', ...
+        'NumberTitle', 'off');
+
+    plot(depth, force, 'LineWidth', 1.2);
+    xlabel('Depth (nm)');
+    ylabel('Force (mN)');
+    title(sprintf('File: %s', fileName), 'Interpreter', 'none');
+    grid on;
+
+    exportgraphics(hSaveFig, outputPngFile, 'Resolution', 300);
+    close(hSaveFig);
+
+    fprintf('Saved PNG: %s\n', outputPngFile);
+    nImagesSaved = nImagesSaved + 1;
 
     %% Optional preview
     if showPreview && isvalid(hFig)
@@ -272,5 +285,6 @@ end
 %% Final report
 fprintf('\nDone.\n');
 fprintf('Files found:   %d\n', nFiles);
-fprintf('Files saved:   %d\n', nSaved);
+fprintf('MAT saved:     %d\n', nSaved);
+fprintf('PNG saved:     %d\n', nImagesSaved);
 fprintf('Files skipped: %d\n', nSkipped);
